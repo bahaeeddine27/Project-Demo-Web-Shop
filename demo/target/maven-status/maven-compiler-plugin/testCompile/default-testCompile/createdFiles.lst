@@ -1,0 +1,5 @@
+com\example\pom\CartPom.class
+com\example\pom\PaymentPOM.class
+com\example\pom\LoginPom.class
+com\example\test\PurchaseTest.class
+com\example\pom\RegisterPagePom.class

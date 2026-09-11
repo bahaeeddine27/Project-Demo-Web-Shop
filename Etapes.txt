@@ -1,0 +1,35 @@
+CLICK REGISTER 
+REMPLIR LE FORMULAIRE 
+click register 
+verifier nouveau url 
+cliquer sur continue
+verifier nouveau url
+click log out
+click log in
+remplir formulaire 
+cliquer remember me
+cliquer login 
+verifier soit logout afficher ou email afficher (au choix)
+cliquer add to cart 
+verifier nouveau url
+saisir name 
+saisir email 
+cliquer add to cart 
+verifier l'affichage 
+sur cet afficher cliquer sur shopping cart 
+click agree 
+click checkout
+verifier url 
+remplir le formulaire (meme les cases non obligatoire)
+cliquer continue
+verifier url :::::::
+choisir credit card 
+click continue 
+saisir name
+saisir card number 
+saisir card code
+cliquer continue 
+verifier url 
+cliquer confirm 
+verifier url 
+verifier msg succes order

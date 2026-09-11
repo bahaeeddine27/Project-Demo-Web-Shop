@@ -2,6 +2,7 @@ package com.example.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.openqa.selenium.chrome.ChromeOptions;
 import java.time.Duration;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +30,12 @@ public class PurchaseTest {
 
     @BeforeEach
     public void setUp() {
+        ChromeOptions options = new ChromeOptions();
+
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--window-size=1920,1080");
 
         driver = new ChromeDriver();
 
@@ -60,7 +67,7 @@ public class PurchaseTest {
 
         registerPage.clickRegisterLink();
 
-        assertEquals( "https://demowebshop.tricentis.com/register", driver.getCurrentUrl() );
+        assertEquals("https://demowebshop.tricentis.com/register", driver.getCurrentUrl());
 
         registerPage.enterFirstName("Bahae");
 

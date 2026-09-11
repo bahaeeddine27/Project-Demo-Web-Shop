@@ -3,15 +3,15 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9-eclipse-temurin-17'
-            args '--shm-size=2g'
+            args '--shm-size=2g -u root'
         }
     }
 
     parameters {
         booleanParam(
             name: 'GENERATE_ALLURE',
-            defaultValue: false,
-            description: 'Activer la génération du rapport Allure'
+            defaultValue: true,
+            description: 'Générer le rapport Allure HTML'
         )
     }
 
@@ -20,6 +20,8 @@ pipeline {
         stage('Préparation') {
             steps {
                 sh '''
+                    echo "===== Installation de Chrome ====="
+
                     apt-get update
                     apt-get install -y wget gnupg ca-certificates
 
@@ -32,9 +34,11 @@ pipeline {
                     apt-get update
                     apt-get install -y google-chrome-stable
 
+                    echo "===== Versions ====="
                     google-chrome --version
                     mvn --version
 
+                    echo "===== Projet ====="
                     ls -la
                     ls -la demo
                     ls -la demo/pom.xml
@@ -51,25 +55,48 @@ pipeline {
                 }
             }
         }
+
+        stage('Génération Allure HTML') {
+            when {
+                expression {
+                    params.GENERATE_ALLURE
+                }
+            }
+
+            steps {
+                dir('demo') {
+                    sh '''
+                        echo "===== Résultats Allure ====="
+                        ls -la target/allure-results || true
+                    '''
+                }
+            }
+        }
     }
 
     post {
 
         always {
 
+            echo '===== Publication Surefire ====='
+
             junit(
                 testResults: 'demo/target/surefire-reports/*.xml',
                 allowEmptyResults: true
             )
 
+            echo '===== Archivage des résultats ====='
+
             archiveArtifacts(
-                artifacts: 'demo/target/surefire-reports/**,demo/target/allure-results/**,demo/target/screenshots/**',
+                artifacts: 'demo/target/surefire-reports/**,demo/target/allure-results/**',
                 allowEmptyArchive: true
             )
 
             script {
 
                 if (params.GENERATE_ALLURE) {
+
+                    echo '===== Publication du rapport Allure ====='
 
                     allure(
                         includeProperties: false,

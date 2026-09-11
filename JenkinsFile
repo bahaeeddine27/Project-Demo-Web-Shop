@@ -1,0 +1,93 @@
+pipeline {
+
+    agent {
+        docker {
+            image 'maven:3.9-eclipse-temurin-17'
+            args '--shm-size=2g'
+        }
+    }
+
+    parameters {
+        booleanParam(
+            name: 'GENERATE_ALLURE',
+            defaultValue: false,
+            description: 'Activer la génération du rapport Allure'
+        )
+    }
+
+    stages {
+
+        stage('Préparation') {
+            steps {
+                sh '''
+                    apt-get update
+                    apt-get install -y wget gnupg ca-certificates
+
+                    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | \
+                    gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+
+                    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+                    > /etc/apt/sources.list.d/google-chrome.list
+
+                    apt-get update
+                    apt-get install -y google-chrome-stable
+
+                    google-chrome --version
+                    mvn --version
+
+                    ls -la
+                    ls -la demo
+                    ls -la demo/pom.xml
+                '''
+            }
+        }
+
+        stage('Tests Selenium') {
+            steps {
+                dir('demo') {
+                    sh '''
+                        mvn clean test
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+
+        always {
+
+            junit(
+                testResults: 'demo/target/surefire-reports/*.xml',
+                allowEmptyResults: true
+            )
+
+            archiveArtifacts(
+                artifacts: 'demo/target/surefire-reports/**,demo/target/allure-results/**,demo/target/screenshots/**',
+                allowEmptyArchive: true
+            )
+
+            script {
+
+                if (params.GENERATE_ALLURE) {
+
+                    allure(
+                        includeProperties: false,
+                        jdk: '',
+                        results: [
+                            [path: 'demo/target/allure-results']
+                        ]
+                    )
+                }
+            }
+        }
+
+        success {
+            echo 'Les tests Selenium sont terminés avec succès.'
+        }
+
+        failure {
+            echo 'Les tests Selenium ont échoué.'
+        }
+    }
+}
